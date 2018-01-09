@@ -66,9 +66,9 @@ const char *_vendor_name = "Altera";
 #define MEAN_DATA_WIDTH   256
 #define MEAN_DATA_HEIGHT  256
 #define MEAN_DATA_CHANNEl 3
-const char *mean_data_file_path   = "./data/picture/mean_data.dat";
-const char *picture_file_path     = "./data/picture/cat.jpg";
-const char *synset_word_file_path = "./data/picture/synset_words.txt";
+const char *mean_data_file_path   = "../data/picture/mean_data.dat";
+const char *picture_file_path     = "../data/picture/cat.jpg";
+const char *synset_word_file_path = "../data/picture/synset_words.txt";
 char  synset_buf[1000][1024]={0};
 
 
