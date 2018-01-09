@@ -1,0 +1,1 @@
+exec env CL_CONTEXT_EMULATOR_DEVICE_ALTERA=1 ./pipecnn conv_e.aocx
