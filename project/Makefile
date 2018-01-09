@@ -1,5 +1,5 @@
 #set source and target for host
-HOST_EXE  = run.exe
+HOST_EXE  = pipecnn
 HOST_SRCS = ./host/main.cpp ../common/ocl_util.cpp ../common/timer.cpp
 HOST_OBJS = $(HOST_SRCS:%.cpp=%.o)
 HOST_INCS = ../common
@@ -14,8 +14,11 @@ VENDOR = altera
 #select the host archecture  x86|arm32
 PLATFORM = x86
 #optinal flows are hw|hw_emu|sw_emu
-FLOW        = sw_emu
+
+#FLOW        = sw_emu
+
 KERNEL_SRCS = ./device/conv_pipe.cl
+KERNEL_LIB_SRCS = ./device/RTL/rtl_lib.xml
 KERNEL_NAME = conv
 KERNEL_DEFS =
 KERNEL_INCS = 
@@ -30,6 +33,8 @@ ifeq ($(VENDOR),xilinx)
 DEV_EXE = $(KERNEL_NAME).xclbin
 else ifeq ($(VENDOR),altera)
 DEV_EXE = $(KERNEL_NAME).aocx
+EMU_EXE = $(KERNEL_NAME)_e.aocx
+DEV_LIB = ./device/RTL/rtl_lib.aoclib
 else ifeq ($(VENDOR),amd)
 DEV_EXE =
 endif
@@ -100,11 +105,12 @@ endif
 #altera
 else ifeq ($(VENDOR),altera)
 OCC = aoc
-ifeq ($(FLOW),sw_emu)
-OCCFLAGS = -v --report -march=emulator -I device/RTL -L device/RTL -l rtl_lib.aoclib 
-else ifeq ($(FLOW),hw)
-OCCFLAGS = -v --report --profile -I device/RTL -L device/RTL -l rtl_lib.aoclib 
-endif
+#ifeq ($(FLOW),sw_emu)
+#OCCFLAGS = -v --report -march=emulator -I device/RTL -L device/RTL -l rtl_lib.aoclib 
+#else ifeq ($(FLOW),hw)
+#OCCFLAGS = -v --report --profile -I device/RTL -L device/RTL -l rtl_lib.aoclib 
+ OCCFLAGS = -v --report -I device/RTL -L device/RTL -l rtl_lib.aoclib
+#endif
 #amd
 else ifeq ($(VENDOR),amd)
 OCC =
@@ -116,14 +122,23 @@ ifeq ($(KERNEL_DEBUG),1)
 	OCCFLAGS += -g
 endif
 
-.PHONY: all
-all: host fpga
+.PHONY: all_hw
+all_hw: host hw
+
+.PHONY: all_emu
+all_emu: host emu
 
 .PHONY: host
 host: $(HOST_EXE)
 
-.PHONY: fpga
-fpga: $(DEV_EXE)
+.PHONY: hw
+hw: $(DEV_EXE)
+
+.PHONY: emu
+emu: $(EMU_EXE)
+
+.PHONY: lib
+lib: $(DEV_LIB)
 
 $(HOST_EXE): $(HOST_OBJS)
 	$(CXX) $(OCV_LIBDIRS) $(OCV_INCLUDES) $(HOST_OBJS) -o $@ $(LINK_CONFIG) $(OCV_LIBS)
@@ -131,9 +146,17 @@ $(HOST_EXE): $(HOST_OBJS)
 %.o: %.cpp
 	$(CXX) $(OCV_LIBDIRS) $(OCV_INCLUDES) $(CXXFLAGS) -c $< -o $@ $(COMP_CONFIG) $(OCV_LIBS)
 
-$(DEV_EXE): $(KERNEL_SRCS)
+$(DEV_EXE): $(KERNEL_SRCS) $(DEV_LIB)
 	$(OCC) $(OCCFLAGS) $< -o $@
 
+$(EMU_EXE): $(KERNEL_SRCS) $(DEV_LIB)
+	$(OCC) $(OCCFLAGS) -march=emulator $< -o $@
+
+$(DEV_LIB): $(KERNEL_LIB_SRCS)
+	make -C ./device/RTL
 .PHONY: clean
 clean:
-	rm -rf *.xclbin *.rpt *.xtxt *.json *.dir *.aocx *.aoco *.exe xocc* sdaccel* ./device/*.ll ./host/*.o ../common/*.o *.log *.jou *.mon
+
+	rm -rf *.xclbin *.aocx *.aoco *.exe xocc* sdaccel* ./device/*.ll ./host/*.o ../common/*.o *.log *.jou $(HOST_EXE) $(KERNEL_NAME) $(KERNEL_NAME)_e *.cl 1q .emu_models
+	make -C ./device/RTL/ clean
+
