@@ -1,7 +1,7 @@
 # PipeCNN
 
 ## About 
-**PipeCNN** is an OpenCL-based FPGA Accelerator for Large-Scale Convolutinal Neural Networks (CNNs).
+**PipeCNN** is an OpenCL-based FPGA Accelerator for Large-Scale Convolutional Neural Networks (CNNs).
 There is a growing trend among the FPGA community to utilize High Level Synthesis (HLS) tools to design
 and implement customized circuits on FPGAs. Compared with RTL-based design methodology, the HLS tools provide faster hardware development
 cycle by automatically synthesizing an algorithm in high-level languages (e.g. C/C++) to RTL/hardware. [OpenCL™](https://www.khronos.org/opencl/) is an open, emergying cross-platform parallel programming language that can be used in both GPU and FPGA developments. The main goal of this project is to provide a generic, yet efficient OpenCL-based design of CNN accelerator on FPGAs. Our design is scalable both in performance and hardware resource, and thus can be deployed on a variety of FPGA platforms.
@@ -12,41 +12,37 @@ First, download the pre-trained CNN models, input test vectors and golden refere
 ```
 ./run.exe conv.aocx
 ```
-For users who are using Xilinx's SDx environments, it is recommended to use the IDE instead of makefiles.
-For more detailed user instructions, please refer to the [docs](https://github.com/doonny/PipeCNN/tree/master/documents).
+For users who are using Xilinx's SDx environments, it is recommended to use the IDE instead of makefiles. Currently, only Intel's OpenCL SDK v16.1 and Xilinx's SDAccel v2017.2 are supported. Please carefully read the [User Instructions](https://github.com/doonny/PipeCNN/tree/master/documents) before using.
 
 ## Boards and Performances
-Currently, we use [Intel's OpenCL SDK](https://www.altera.com/products/design-software/embedded-software-developers/opencl/overview.html) v16.1 toolset for compilation of the OpenCL code and implementation of the generated RTL on Altera's FPGAs. For Xilinx FPGAs, the [SDAccel](https://www.xilinx.com/products/design-tools/software-zone/sdaccel.html) and [SDSoc](https://www.xilinx.com/products/design-tools/software-zone/sdsoc.html) development environments v2017.1 are used. PipeCNN has been tested on the following FPGA boards/platforms, and the achieved performances are reported in Table-I. We welcome other vendors/researches to provide performance and cost information on other FPGA platforms/boards.
+Currently, we use [Intel's OpenCL SDK](https://www.altera.com/products/design-software/embedded-software-developers/opencl/overview.html) v16.1 toolset for compilation of the OpenCL code and implementation of the generated RTL on Altera's FPGAs. For Xilinx FPGAs, the [SDAccel](https://www.xilinx.com/products/design-tools/software-zone/sdaccel.html) and [SDSoc](https://www.xilinx.com/products/design-tools/software-zone/sdsoc.html) development environments v2017.2 can be used. PipeCNN has been tested and evaluated on the following FPGA boards/platforms.
 
-
-* Terasic's [DE5-net](http://www.terasic.com.cn/cgi-bin/page/archive.pl?Language=China&CategoryNo=179&No=727) (Stratix-IV A7 FPGA)
+* Terasic's [DE5-net](http://www.terasic.com.cn/cgi-bin/page/archive.pl?Language=China&CategoryNo=179&No=727) (Stratix-V A7 FPGA)
 * Terasic's [DE5a-net](http://www.terasic.com.cn/cgi-bin/page/archive.pl?Language=China&CategoryNo=251&No=988) (Arria-10 1150 FPGA)
 * Terasic's [DE1-soc](http://www.terasic.com.cn/cgi-bin/page/archive.pl?Language=China&CategoryNo=180&No=870) (Cyclone-V SEA5 FPGA)
 * Terasic's [DE10-standard](http://www.terasic.com.cn/cgi-bin/page/archive.pl?Language=China&CategoryNo=180&No=1105) (Cyclone-V SXC6 FPGA)
-* AlphaData's [ADM-PCIE-7V3](http://www.alpha-data.com/dcp/products.php?product=adm-pcie-7v3) (Virtex-7 690T FPGA)
+* Xilinx's [KCU1500](https://www.xilinx.com/products/boards-and-kits/dk-u1-kcu1500-g.html) (XCKU115 FPGA)
+* Speed-Clouds' [SC-IMB+SC-VMB](http://speed-clouds.com/index.php?c=news&a=page&id=74) (Arria-10 SX480)
 
-*Table-I. Performance Measured and Hardware Resource Concumed*
+This following table lists the performance and cost information on some of the boards we used as a reference. For each FPGA device, one needs to perform design space exploration (with hardware parameters VEC_SIZE, LANE_NUM and CONV_GP_SIZE_X) to find the optimal design that maximizes the throughput or minimizes the excution time. Suggested hardware parameters for the above boards are summarized [here](https://github.com/doonny/PipeCNN/tree/master/documents). Since we are constantly optimzing the design and updating the codes, the performance data in the following table might be out-dated, and please use the latest version to get the exect data. We welcome other vendors/researches to provide the latest performance and cost information on other FPGA platforms/boards.
 
-|Platform|Performance|Speed|CNN Model|DSP Consumed|Configuration|
-|:-|:-:|:-:|:-:|:-:|:-:|
-|Stratix-V A7    |--         |--      |AlexNet|   --|      --|
-|Arria-10 1150   |--         |--      |AlexNet|   --|      --|
-|Cyclone-V SEA5  |9.24GOPS   |6.6fps  |AlexNet|   68| V=8,L=8,GP_X=7|
-|Virtex-7 690T   |--         |--      |AlexNet|   --|      --|
+| Boards     | Excution Time* | Batch Size | DSP Consumed |  Frequency|
+| :--------: |--------------:| ----------:| ------------:|----------:|
+| DE1-soc    |         150ms |          1 |            68|     122MHz|
+| DE5-net    |          15ms |         16 |           228|     206MHz|
 
-*Note: parameters V, L, GP_X refers to VEC_SIZE, LANE_NUM, and CONV_GP_SIZE_X, respectively*
-
+*Note: AlexNet was used as the benchmark. Image size is 227x227x3.
 
 
 ## Update Plans
-* Implementation of Faster-RCNN (end of August)
-* Optimization for DE5a-net (Arria-10) targeting 500 fps of AlexNet (end of August)
-* Support for sparse or Winograd-based convolution algorithms
+* Support for sparse or Winograd-based convolution algorithms.
+* Optimization for DE5a-net (Arria-10) targeting 1000 fps of AlexNet.
+* Implementation of Faster-RCNN or YOLO9000.
 
 ## Citation
 Please kindly cite our work of PipeCNN if it helps your research:
 ```
-Dong Wang, Jiangjing An and Ke Xu, “PipeCNN: An OpenCL-Based FPGA Accelerator for Large-Scale Convolution Neuron Networks”, https://arxiv.org/abs/1611.02450, 2016.
+Dong Wang, Ke Xu and Diankun Jiang, “PipeCNN: An OpenCL-Based Open-Source FPGA Accelerator for Convolution Neural Networks”, FPT 2017.
 ```
 
 
