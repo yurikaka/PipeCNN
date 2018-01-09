@@ -1088,10 +1088,11 @@ int main(int argc, char** argv)
 	#ifdef USE_OPENCV
 	softmax(output_reorder, output_one_item);
 	display(output_one_item);
+
 	// Show the picture
-	Mat img = imread(picture_file_path);
-    imshow( "PipeCNN", img);
-    waitKey(0);
+	//Mat img = imread(picture_file_path);
+    //imshow( "PipeCNN", img);
+    //waitKey(0);
 	#else
 	// Compare each results with the golden reference data
 	batch_item_size = output_config[output_w]*output_config[output_h]*output_config[output_n];
@@ -1600,24 +1601,27 @@ void softmax(DTYPE *output_reorder , DTYPE *output)
 
 void display(DTYPE *output)
 {
-    int m=0;
-    float max=output[0];
-
+    // int m=0;
+    // float max=output[0];
+    vector<pair<float,int>> vv;
 	// find the class with the highest score
     for(unsigned int i=0;i<output_config[output_n];i++){
-        if(max<output[i]){
-			max=output[i];
-            m=i;
-		}
+        // if(max<output[i]){
+			// max=output[i];
+            // m=i;
+		// }
+    	vv.push_back({output[i],i});
     }
+    sort(vv.begin(),vv.end());
+    reverse(vv.begin(),vv.end());
 
 	// replace the last two ASCII charactor with space
-	int ii=strlen(synset_buf[m]);
-    synset_buf[m][ii-2]= 32;
-    synset_buf[m][ii-1]= 32;
-
-	printf("\nThe inference result is %s (the prob is %5.2f) \n\n", synset_buf[m], max);
-
+	// int ii=strlen(synset_buf[m]);
+    // synset_buf[m][ii-2]= 32;
+    // synset_buf[m][ii-1]= 32;
+    for (int i = 0; i < 5; ++i) {
+		printf("The inference result is %s (the prob is %5.2f) \n", synset_buf[vv[i].second], vv[i].first);
+	}
 }
 
 void dumpResult(){
