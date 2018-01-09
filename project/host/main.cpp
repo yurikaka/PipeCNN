@@ -35,7 +35,8 @@ typedef  signed char  DTYPE;
 //const char *vendor_name = "Xilinx";
 //const char *vendor_name = "Altera";
 //const char *vendor_name = "AMD";
-const char *vendor_name = "Intel";
+const char *vendor_name = "Altera";
+const char *_vendor_name = "Intel";
 #define DEVICE_TYPE CL_DEVICE_TYPE_ACCELERATOR
 //#define DEVICE_TYPE CL_DEVICE_TYPE_GPU
 
@@ -87,9 +88,9 @@ const char *dump_file_path = "./result_dump.txt";
 #define WEIGHTS_FILE_SIZE 61063552  //fc8-1024
 #define LAYER_NUM         8
 #define CONV_NUM          5
-const char *weight_file_path = "./data/data_alex/weights.dat";
-const char *input_file_path = "./data/data_alex/image.dat";
-const char *ref_file_path = "./data/data_alex/fc8.dat";
+const char *weight_file_path = "../data/data_alex/weights.dat";
+const char *input_file_path = "../data/data_alex/image.dat";
+const char *ref_file_path = "../data/data_alex/fc8.dat";
 const char *dump_file_path = "./result_dump.txt";
 
 
@@ -102,9 +103,9 @@ const char *dump_file_path = "./result_dump.txt";
 #define LAYER_NUM         16
 #define CONV_NUM          13
 
-const char *weight_file_path = "./data/data_vgg/weights.dat";
-const char *input_file_path = "./data/data_vgg/image.dat";
-const char *ref_file_path = "./data/data_vgg/fc8.dat";
+const char *weight_file_path = "../data/data_vgg/weights.dat";
+const char *input_file_path = "../data/data_vgg/image.dat";
+const char *ref_file_path = "../data/data_vgg/fc8.dat";
 const char *dump_file_path = "./result_dump.txt";
 */
 
@@ -249,6 +250,8 @@ int main(int argc, char** argv)
 	
 	// Connect to the desired platform
 	platform_id = findPlatform(vendor_name);
+	if(platform_id == NULL)
+		platform_id = findPlatform(_vendor_name);
 	if(platform_id == NULL) {
 		printf("ERROR: Unable to find the desired OpenCL platform.\n");
 		return false;
